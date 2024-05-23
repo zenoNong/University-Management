@@ -1,0 +1,28 @@
+CREATE DATABASE PlacementDB;
+
+USE PlacementDB;
+
+CREATE TABLE admin_selected_students (
+    StudentId INT NOT NULL,
+    StudentName VARCHAR(255) NOT NULL,
+    JobId INT NOT NULL,
+    JoinDate DATE NOT NULL,
+    PRIMARY KEY (StudentId)
+);
+
+CREATE TABLE applied_students (
+    PostId INT NOT NULL,
+    StudentId INT NOT NULL,
+    StudentName VARCHAR(255) NOT NULL,
+    Resume TEXT NOT NULL,
+    PRIMARY KEY (PostId, StudentId)
+);
+
+CREATE TABLE job_posts (
+    PostId INT NOT NULL AUTO_INCREMENT,
+    Location VARCHAR(255) NOT NULL,
+    Description TEXT NOT NULL,
+    Requirement TEXT NOT NULL,
+    Deadline DATE NOT NULL,
+    PRIMARY KEY (PostId)
+);
