@@ -1,4 +1,4 @@
-package com.example.placementmanagementapp;
+package com.example.placementmanagementmodule;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -15,8 +15,10 @@ public class MainApp extends Application {
     private Connection connection;
 
     public static void main(String[] args) {
+
         launch(args);
     }
+
 
     @Override
     public void start(Stage primaryStage) {
@@ -27,7 +29,7 @@ public class MainApp extends Application {
         VBox loginBox = new VBox(10);
         loginBox.setPadding(new Insets(10));
         loginBox.setAlignment(Pos.CENTER);
-
+        Label lb = new Label("Admin login");
         TextField usernameField = new TextField();
         usernameField.setPromptText("Username");
         PasswordField passwordField = new PasswordField();
@@ -36,17 +38,14 @@ public class MainApp extends Application {
         Button studentGuestButton = new Button("Continue as Student/Guest");
         Button login1 = new Button("Login Page");
         Button login2 = new Button("Login Page");
+        loginBox.getChildren().addAll(lb, usernameField, passwordField, loginButton,new Label("or"), studentGuestButton);
+        Scene loginScene = new Scene(loginBox, 400, 250);
 
-
-        loginBox.getChildren().addAll(new Label("Admin Login"), usernameField, passwordField, loginButton,new Label("or"), studentGuestButton);
-
-        Scene loginScene = new Scene(loginBox, 300, 200);
 
         // Admin Page
         VBox adminBox = new VBox(10);
         adminBox.setPadding(new Insets(10));
-        adminBox.setAlignment(Pos.CENTER_LEFT);
-
+        adminBox.setAlignment(Pos.CENTER);
         Button addPostButton = new Button("Add New Post");
         Button updatePostButton = new Button("Update Post");
         Button addStudentButton = new Button("Add Student");
@@ -55,35 +54,31 @@ public class MainApp extends Application {
         Button homeA2 = new Button("Home");
         Button homeA3 = new Button("Home");
         Button homeA4 = new Button("Home");
-
         adminBox.getChildren().addAll(addPostButton, updatePostButton, addStudentButton, updateStudentButton,login1);
+        Scene adminScene = new Scene(adminBox, 400, 250);
+        homeA1.setOnAction(e -> primaryStage.setScene(adminScene));
+        homeA2.setOnAction(e -> primaryStage.setScene(adminScene));
+        homeA3.setOnAction(e -> primaryStage.setScene(adminScene));
+        homeA4.setOnAction(e -> primaryStage.setScene(adminScene));
+        login1.setOnAction(e -> primaryStage.setScene(loginScene));
 
-        Scene adminScene = new Scene(adminBox, 400, 400);
 
         // Student/Guest Page
         VBox studentBox = new VBox(10);
         studentBox.setPadding(new Insets(10));
-        studentBox.setAlignment(Pos.CENTER_LEFT);
-
+        studentBox.setAlignment(Pos.CENTER);
         Button seeJobPostsButton = new Button("See Job Posts");
         Button applyForJobsButton = new Button("Apply for Jobs");
         Button resultsButton = new Button("Results");
         Button homeS1 = new Button("Home");
         Button homeS2 = new Button("Home");
         Button homeS3 = new Button("Home");
-
         studentBox.getChildren().addAll(seeJobPostsButton, applyForJobsButton, resultsButton,login2);
-
-        Scene studentScene = new Scene(studentBox, 400, 400);
+        Scene studentScene = new Scene(studentBox, 400, 250);
 
         homeS1.setOnAction(e -> primaryStage.setScene(studentScene));
         homeS2.setOnAction(e -> primaryStage.setScene(studentScene));
         homeS3.setOnAction(e -> primaryStage.setScene(studentScene));
-        homeA4.setOnAction(e -> primaryStage.setScene(adminScene));
-        homeA1.setOnAction(e -> primaryStage.setScene(adminScene));
-        homeA2.setOnAction(e -> primaryStage.setScene(adminScene));
-        homeA3.setOnAction(e -> primaryStage.setScene(adminScene));
-        login1.setOnAction(e -> primaryStage.setScene(loginScene));
         login2.setOnAction(e -> primaryStage.setScene(loginScene));
 
         loginButton.setOnAction(e -> {
@@ -92,6 +87,8 @@ public class MainApp extends Application {
             } else {
                 showAlert(Alert.AlertType.ERROR, "Invalid Credentials");
             }
+            usernameField.setText("");
+            passwordField.setText("");
         });
 
         studentGuestButton.setOnAction(e -> primaryStage.setScene(studentScene));
@@ -111,25 +108,39 @@ public class MainApp extends Application {
         TextArea descriptionArea = new TextArea();
         descriptionArea.setPromptText("Description");
         TextArea requirementArea = new TextArea();
-        requirementArea.setPromptText("Requirement");
+        requirementArea.setPromptText("Required qualifications for the post");
         DatePicker deadlinePicker = new DatePicker();
+        deadlinePicker.setPromptText("Deadline");
         Button postButton = new Button("Post");
-
         addPostBox.getChildren().addAll(new Label("Enter details of the post."),postIdField, locationField, descriptionArea, requirementArea, deadlinePicker, postButton,homeA1);
         Scene addPostScene = new Scene(addPostBox, 400, 400);
 
-        addPostButton.setOnAction(e -> primaryStage.setScene(addPostScene));
+        addPostButton.setOnAction(e -> {
+            primaryStage.setScene(addPostScene);
+            postIdField.setText("");
+            locationField.setText("");
+            descriptionArea.setText("");
+            requirementArea.setText("");
+            deadlinePicker.setValue(null);
+        });
 
         postButton.setOnAction(e -> {
             addNewPost(Integer.parseInt(postIdField.getText()), locationField.getText(), descriptionArea.getText(), requirementArea.getText(), Date.valueOf(deadlinePicker.getValue()));
             showAlert(Alert.AlertType.INFORMATION, "Post Added Successfully");
+            primaryStage.setScene(addPostScene);
+            postIdField.setText("");
+            locationField.setText("");
+            descriptionArea.setText("");
+            requirementArea.setText("");
+            deadlinePicker.setValue(null);
+
         });
+
 
         // Update Post Page
         VBox updatePostBox = new VBox(10);
         updatePostBox.setPadding(new Insets(10));
         updatePostBox.setAlignment(Pos.CENTER_LEFT);
-
         TextField updatePostIdField = new TextField();
         updatePostIdField.setPromptText("PostId");
         TextField updateLocationField = new TextField();
@@ -139,31 +150,47 @@ public class MainApp extends Application {
         TextArea updateRequirementArea = new TextArea();
         updateRequirementArea.setPromptText("Requirement");
         DatePicker updateDeadlinePicker = new DatePicker();
+        updateDeadlinePicker.setPromptText("Deadline");
         Button updateButton = new Button("Update");
+        Label l2 = new Label("OR Enter the Post ID to delete");
         TextField deletePostIdField = new TextField();
-        deletePostIdField.setPromptText("PostId to Delete");
+        deletePostIdField.setPromptText("PostId");
         Button deleteButton = new Button("Delete");
-
-        updatePostBox.getChildren().addAll(new Label("Update or delete the post."),updatePostIdField, updateLocationField, updateDescriptionArea, updateRequirementArea, updateDeadlinePicker, updateButton, deletePostIdField, deleteButton,homeA2);
+        updatePostBox.getChildren().addAll(new Label("Update or delete the post."),updatePostIdField, updateLocationField, updateDescriptionArea, updateRequirementArea, updateDeadlinePicker, updateButton, l2,deletePostIdField, deleteButton,homeA2);
         Scene updatePostScene = new Scene(updatePostBox, 400, 400);
 
-        updatePostButton.setOnAction(e -> primaryStage.setScene(updatePostScene));
+        updatePostButton.setOnAction(e -> {
+            primaryStage.setScene(updatePostScene);
+            updatePostIdField.setText("");
+            updateLocationField.setText("");
+            updateDescriptionArea.setText("");
+            updateRequirementArea.setText("");
+            updateDeadlinePicker.setValue(null);
+            deletePostIdField.setText("");
+        });
 
         updateButton.setOnAction(e -> {
             updatePost(Integer.parseInt(updatePostIdField.getText()), updateLocationField.getText(), updateDescriptionArea.getText(), updateRequirementArea.getText(), Date.valueOf(updateDeadlinePicker.getValue()));
             showAlert(Alert.AlertType.INFORMATION, "Post Updated Successfully");
+            primaryStage.setScene(updatePostScene);
+            updatePostIdField.setText("");
+            updateLocationField.setText("");
+            updateDescriptionArea.setText("");
+            updateRequirementArea.setText("");
+            updateDeadlinePicker.setValue(null);
+
         });
 
         deleteButton.setOnAction(e -> {
             deletePost(Integer.parseInt(deletePostIdField.getText()));
             showAlert(Alert.AlertType.INFORMATION, "Post Deleted Successfully");
+            deletePostIdField.setText("");
         });
 
         // Add Student Page
         VBox addStudentBox = new VBox(10);
         addStudentBox.setPadding(new Insets(10));
         addStudentBox.setAlignment(Pos.CENTER_LEFT);
-
         TextField studentIdField = new TextField();
         studentIdField.setPromptText("StudentId");
         TextField studentNameField = new TextField();
@@ -171,23 +198,34 @@ public class MainApp extends Application {
         TextField jobIdField = new TextField();
         jobIdField.setPromptText("JobId");
         DatePicker joinDatePicker = new DatePicker();
+        joinDatePicker.setPromptText("Join date");
         Button addStudentBtn = new Button("Add");
-
         addStudentBox.getChildren().addAll(new Label("Enter details of student"),studentIdField, studentNameField, jobIdField, joinDatePicker, addStudentBtn,homeA3);
         Scene addStudentScene = new Scene(addStudentBox, 400, 400);
 
-        addStudentButton.setOnAction(e -> primaryStage.setScene(addStudentScene));
+        addStudentButton.setOnAction(e -> {
+            primaryStage.setScene(addStudentScene);
+            studentIdField.setText("");
+            studentNameField.setText("");
+            jobIdField.setText("");
+            joinDatePicker.setValue(null);
+        });
 
         addStudentBtn.setOnAction(e -> {
             addStudent(Integer.parseInt(studentIdField.getText()), studentNameField.getText(), Integer.parseInt(jobIdField.getText()), Date.valueOf(joinDatePicker.getValue()));
             showAlert(Alert.AlertType.INFORMATION, "Student Added Successfully");
+            primaryStage.setScene(addStudentScene);
+            studentIdField.setText("");
+            studentNameField.setText("");
+            jobIdField.setText("");
+            joinDatePicker.setValue(null);
         });
+
 
         // Update Student Page
         VBox updateStudentBox = new VBox(10);
         updateStudentBox.setPadding(new Insets(10));
         updateStudentBox.setAlignment(Pos.CENTER_LEFT);
-
         TextField updateStudentIdField = new TextField();
         updateStudentIdField.setPromptText("StudentId");
         TextField updateStudentNameField = new TextField();
@@ -195,35 +233,49 @@ public class MainApp extends Application {
         TextField updateJobIdField = new TextField();
         updateJobIdField.setPromptText("JobId");
         DatePicker updateJoinDatePicker = new DatePicker();
+        updateJoinDatePicker.setValue(null);
         Button updateStudentBtn = new Button("Update");
         TextField deleteStudentIdField = new TextField();
-        deleteStudentIdField.setPromptText("StudentId to Delete");
+        Label l3 = new Label("OR Enter student id to delete");
+        deleteStudentIdField.setPromptText("StudentId");
         Button deleteStudentBtn = new Button("Delete");
-
-        updateStudentBox.getChildren().addAll(new Label("Update/Delete student details."),updateStudentIdField, updateStudentNameField, updateJobIdField, updateJoinDatePicker, updateStudentBtn, deleteStudentIdField, deleteStudentBtn,homeA4);
+        updateStudentBox.getChildren().addAll(new Label("Update/Delete student details"),updateStudentIdField, updateStudentNameField, updateJobIdField, updateJoinDatePicker, updateStudentBtn,l3, deleteStudentIdField, deleteStudentBtn,homeA4);
         Scene updateStudentScene = new Scene(updateStudentBox, 400, 400);
 
-        updateStudentButton.setOnAction(e -> primaryStage.setScene(updateStudentScene));
+        updateStudentButton.setOnAction(e -> {
+            primaryStage.setScene(updateStudentScene);
+            updateStudentIdField.setText("");
+            updateStudentNameField.setText("");
+            updateJobIdField.setText("");
+            updateJoinDatePicker.setValue(null);
+            deleteStudentIdField.setText("");
+        });
 
         updateStudentBtn.setOnAction(e -> {
             updateStudent(Integer.parseInt(updateStudentIdField.getText()), updateStudentNameField.getText(), Integer.parseInt(updateJobIdField.getText()), Date.valueOf(updateJoinDatePicker.getValue()));
             showAlert(Alert.AlertType.INFORMATION, "Student Updated Successfully");
+            primaryStage.setScene(updateStudentScene);
+            updateStudentIdField.setText("");
+            updateStudentNameField.setText("");
+            updateJobIdField.setText("");
+            deleteStudentIdField.setText("");
         });
 
         deleteStudentBtn.setOnAction(e -> {
             deleteStudent(Integer.parseInt(deleteStudentIdField.getText()));
             showAlert(Alert.AlertType.INFORMATION, "Student Deleted Successfully");
+            updateJoinDatePicker.setValue(null);
         });
+
 
         // See Job Posts Page
         VBox seeJobPostsBox = new VBox(10);
         seeJobPostsBox.setPadding(new Insets(10));
         seeJobPostsBox.setAlignment(Pos.CENTER_LEFT);
-
         ListView<String> jobPostsList = new ListView<>();
         Button applyButton = new Button("Apply");
 
-        seeJobPostsBox.getChildren().addAll(jobPostsList, applyButton,homeS1);
+        seeJobPostsBox.getChildren().addAll(new Label("See available job posts"),jobPostsList, applyButton,homeS1);
         Scene seeJobPostsScene = new Scene(seeJobPostsBox, 400, 400);
 
         seeJobPostsButton.setOnAction(e -> {
@@ -247,24 +299,39 @@ public class MainApp extends Application {
         resumeArea.setPromptText("Resume");
         Button applyJobButton = new Button("Apply");
 
-        applyForJobsBox.getChildren().addAll(applyPostIdField, applyStudentIdField, applyStudentNameField, resumeArea, applyJobButton,homeS2);
+        applyForJobsBox.getChildren().addAll(new Label("Enter details to apply"),applyPostIdField, applyStudentIdField, applyStudentNameField, resumeArea, applyJobButton,homeS2);
         Scene applyForJobsScene = new Scene(applyForJobsBox, 400, 400);
 
-        applyForJobsButton.setOnAction(e -> primaryStage.setScene(applyForJobsScene));
-        applyButton.setOnAction(e -> primaryStage.setScene(applyForJobsScene));
+        applyForJobsButton.setOnAction(e -> {
+            primaryStage.setScene(applyForJobsScene);
+            applyPostIdField.setText("");
+            applyStudentIdField.setText("");
+            applyStudentNameField.setText("");
+            resumeArea.setText("");
+        });
+        applyButton.setOnAction(e -> {
+            primaryStage.setScene(applyForJobsScene);
+            applyPostIdField.setText("");
+            applyStudentIdField.setText("");
+            applyStudentNameField.setText("");
+            resumeArea.setText("");
+        });
 
         applyJobButton.setOnAction(e -> {
             applyForJob(Integer.parseInt(applyPostIdField.getText()), Integer.parseInt(applyStudentIdField.getText()), applyStudentNameField.getText(), resumeArea.getText());
             showAlert(Alert.AlertType.INFORMATION, "Applied Successfully");
+            applyPostIdField.setText("");
+            applyStudentIdField.setText("");
+            applyStudentNameField.setText("");
+            resumeArea.setText("");
         });
 
         // Results Page
         VBox resultsBox = new VBox(10);
         resultsBox.setPadding(new Insets(10));
         resultsBox.setAlignment(Pos.CENTER_LEFT);
-
         ListView<String> resultsList = new ListView<>();
-        resultsBox.getChildren().addAll(resultsList,homeS3);
+        resultsBox.getChildren().addAll(new Label("Selected Students"),resultsList,homeS3);
         Scene resultsScene = new Scene(resultsBox, 400, 400);
 
         resultsButton.setOnAction(e -> {
@@ -406,3 +473,4 @@ public class MainApp extends Application {
         alert.showAndWait();
     }
 }
+
