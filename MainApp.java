@@ -91,6 +91,8 @@ public class MainApp extends Application {
             passwordField.setText("");
         });
 
+
+
         studentGuestButton.setOnAction(e -> primaryStage.setScene(studentScene));
 
         primaryStage.setScene(loginScene);
@@ -350,9 +352,24 @@ public class MainApp extends Application {
     }
 
     private boolean validateAdmin(String username, String password) {
-        // Simple validation for demonstration; replace with real validation logic
-        return "admin".equals(username) && "123".equals(password);
+        String query = "SELECT COUNT(*) FROM admin_credentials WHERE username = ? AND password = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+
+            pstmt.setString(1, username);
+            pstmt.setString(2, password);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt(1);
+                    return count > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
+
 
     private void addNewPost(int postId, String location, String description, String requirement, Date deadline) {
         try {
