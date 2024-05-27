@@ -29,13 +29,13 @@ public class MainApp extends Application {
         VBox loginBox = new VBox(10);
         loginBox.setPadding(new Insets(10));
         loginBox.setAlignment(Pos.CENTER);
-        Label lb = new Label("Admin login");
+        Label lb = new Label("Please Login");
         TextField usernameField = new TextField();
         usernameField.setPromptText("Username");
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Password");
-        Button loginButton = new Button("Continue as Admin");
-        Button studentGuestButton = new Button("Continue as Student/Guest");
+        Button loginButton = new Button("Login as Admin");
+        Button studentGuestButton = new Button("Login as Student");
         Button login1 = new Button("Login Page");
         Button login2 = new Button("Login Page");
         loginBox.getChildren().addAll(lb, usernameField, passwordField, loginButton,new Label("or"), studentGuestButton);
@@ -48,13 +48,14 @@ public class MainApp extends Application {
         adminBox.setAlignment(Pos.CENTER);
         Button addPostButton = new Button("Add New Post");
         Button updatePostButton = new Button("Update Post");
+        Button seeAppliedStudentButton = new Button("Jobs applied by students");
         Button addStudentButton = new Button("Add Student");
         Button updateStudentButton = new Button("Update Student");
         Button homeA1 = new Button("Home");
         Button homeA2 = new Button("Home");
         Button homeA3 = new Button("Home");
         Button homeA4 = new Button("Home");
-        adminBox.getChildren().addAll(addPostButton, updatePostButton, addStudentButton, updateStudentButton,login1);
+        adminBox.getChildren().addAll(addPostButton, updatePostButton,seeAppliedStudentButton, addStudentButton, updateStudentButton,login1);
         Scene adminScene = new Scene(adminBox, 400, 250);
         homeA1.setOnAction(e -> primaryStage.setScene(adminScene));
         homeA2.setOnAction(e -> primaryStage.setScene(adminScene));
@@ -82,7 +83,7 @@ public class MainApp extends Application {
         login2.setOnAction(e -> primaryStage.setScene(loginScene));
 
         loginButton.setOnAction(e -> {
-            if (validateAdmin(usernameField.getText(), passwordField.getText())) {
+            if (validateAdmin(usernameField.getText(), passwordField.getText(),"admin")) {
                 primaryStage.setScene(adminScene);
             } else {
                 showAlert(Alert.AlertType.ERROR, "Invalid Credentials");
@@ -93,7 +94,18 @@ public class MainApp extends Application {
 
 
 
-        studentGuestButton.setOnAction(e -> primaryStage.setScene(studentScene));
+
+        studentGuestButton.setOnAction(e -> {
+            if(validateStudent(usernameField.getText(),passwordField.getText(),"student")){
+                primaryStage.setScene(studentScene);
+            }
+            else{
+                showAlert(Alert.AlertType.ERROR, "Invalid Credentials");
+            }
+            usernameField.setText("");
+            passwordField.setText("");
+
+        });
 
         primaryStage.setScene(loginScene);
         primaryStage.show();
@@ -188,6 +200,24 @@ public class MainApp extends Application {
             showAlert(Alert.AlertType.INFORMATION, "Post Deleted Successfully");
             deletePostIdField.setText("");
         });
+
+        // See job applied students
+        VBox seeJobAppliedStudents = new VBox(10);
+        seeJobAppliedStudents.setPadding(new Insets(10));
+        seeJobAppliedStudents.setAlignment(Pos.CENTER_LEFT);
+        ListView<String> jobAppliedList = new ListView<>();
+        Button homeA5 = new Button("Home");
+        seeJobAppliedStudents.getChildren().addAll(new Label("Details of job applied students"),jobAppliedList,homeA5);
+        Scene seeAppliedStudent = new Scene(seeJobAppliedStudents,400,400);
+
+        seeAppliedStudentButton.setOnAction(e ->{
+            jobAppliedList.getItems().clear();
+            seeJobAppliedStudentsList(jobAppliedList);
+            primaryStage.setScene(seeAppliedStudent);
+        });
+        homeA5.setOnAction(e -> primaryStage.setScene(adminScene));
+
+
 
         // Add Student Page
         VBox addStudentBox = new VBox(10);
@@ -351,12 +381,33 @@ public class MainApp extends Application {
         }
     }
 
-    private boolean validateAdmin(String username, String password) {
-        String query = "SELECT COUNT(*) FROM admin_credentials WHERE username = ? AND password = ?";
+    private boolean validateAdmin(String username, String password,String userType) {
+        String query = "SELECT COUNT(*) FROM admin_credentials WHERE username = ? AND password = ? AND usertype = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
 
             pstmt.setString(1, username);
             pstmt.setString(2, password);
+            pstmt.setString(3, userType);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt(1);
+                    return count > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private boolean validateStudent(String username, String password, String userType) {
+        String query = "SELECT COUNT(*) FROM admin_credentials WHERE username = ? AND password = ? AND usertype = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+
+            pstmt.setString(1, username);
+            pstmt.setString(2, password);
+            pstmt.setString(3, userType);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -478,6 +529,18 @@ public class MainApp extends Application {
             while (rs.next()) {
                 String resultDetails = "PostId: " + rs.getInt("JobId") + ", StudentId: " + rs.getInt("StudentId") + ", StudentName: " + rs.getString("StudentName") + ", JoinDate: " + rs.getDate("JoinDate");
                 resultsList.getItems().add(resultDetails);// Populate resultsList ListView here
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    private void seeJobAppliedStudentsList(ListView<String> jobAppliedList) {
+        try {
+            PreparedStatement stmt = connection.prepareStatement("SELECT * FROM applied_students ORDER BY PostId");
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                String postDetails = "PostId: " + rs.getInt("PostId")  + ", StudentId: " + rs.getString("StudentId") + ", studentName: " + rs.getString("StudentName") + ", Resume: " + rs.getString("Resume");
+                jobAppliedList.getItems().add(postDetails);// Populate jobPostsList ListView here
             }
         } catch (SQLException e) {
             e.printStackTrace();
