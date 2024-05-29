@@ -375,7 +375,7 @@ public class MainApp extends Application {
 
     private void connectDatabase() {
         try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/placement_management", "root", "Yfmp1234#*");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/placement_management", "root", "xxxxxxx");
         } catch (SQLException e) {
             e.printStackTrace();
         }
